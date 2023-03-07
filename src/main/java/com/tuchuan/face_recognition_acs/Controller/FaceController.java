@@ -22,7 +22,7 @@ public class FaceController {
         String originalFilename = file.getOriginalFilename();
         String suffix = originalFilename.substring(originalFilename.lastIndexOf("."));
 
-        File dir = new File(BasePath);
+        File dir = new File(BasePath+"/img");
         if(!dir.exists()) {
             dir.mkdirs();
         }

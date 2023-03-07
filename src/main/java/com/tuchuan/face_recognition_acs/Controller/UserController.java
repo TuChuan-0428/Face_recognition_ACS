@@ -1,17 +1,25 @@
 package com.tuchuan.face_recognition_acs.Controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.tuchuan.face_recognition_acs.Common.R;
 import com.tuchuan.face_recognition_acs.Entity.User;
 import com.tuchuan.face_recognition_acs.Service.UserService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
 @CrossOrigin
 @Slf4j
 @RestController
@@ -19,42 +27,36 @@ import javax.servlet.http.HttpServletRequest;
 public class UserController {
     @Autowired
     private UserService userService;
-    @GetMapping("/info")
-    public R<String> test() {
-        return R.success("123");
-    }
     @PostMapping("/login")
-    public R<String> login(HttpServletRequest request,@RequestBody User user)
+    public R<Map<String,Object>> login(@RequestBody User user)
     {
-        log.info("user:{}",user);
-        //1.将页面提交的密码password进行MD5加密
-        String password = user.getPassword();
-        password = DigestUtils.md5DigestAsHex(password.getBytes());
-        //2.根据页面提交的用户名username查找数据库
+        //如果用户密码正确返回登录对象，否则返回null
+        Map<String,Object> data = userService.login(user);
+        if(data != null) {
+            return R.success(data);
+        }
         LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(user.getUsername() != null,User::getUsername,user.getUsername());
-        User user1 = userService.getOne(wrapper);
-        //3.如果没有查询结果则返回用户不存在
-        if(user1 == null) {
-            return R.error("用户不存在");
-        }
-        //4.密码比对，密码不一致返回密码错误
-        if(!user1.getPassword().equals(password)) {
+        User one = userService.getOne(wrapper);
+        if(one != null)
             return R.error("密码错误");
-        }
-        //5.登录成功，将员工id存入session中并返回登录结果
-        request.getSession().setAttribute("user",user.getId());
-        return R.success("登录成功，当前身份"+user.getClassname());
+        return R.error("用户不存在");
     }
     @PostMapping("/logout")
-    public R<String> logout(HttpServletRequest request)
+    public R<String> logout(@RequestHeader("X-token") String token)
     {
-        request.removeAttribute("user");
+        userService.logout(token);
         return R.success("退出登录");
     }
+    @GetMapping("/info")
+    public R<Map<String,Object>> getUserInfo(@RequestParam("token") String token) {
+        Map<String,Object> data = userService.getUserInfo(token);
+        return R.success(data);
+    }
     @PostMapping
-    public R<String> regUser(User user)
+    public R<String> regUser(@RequestBody User user)
     {
+        log.info("user:{}",user);
         //1.将页面提交的密码password进行MD5加密
         user.setPassword(DigestUtils.md5DigestAsHex(user.getPassword().getBytes()));
         //2.校验用户名和手机号是否重复
@@ -86,32 +88,29 @@ public class UserController {
         LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
         wrapper.like(StringUtils.isNotEmpty(name),User::getName,name);
         wrapper.like(StringUtils.isNotEmpty(classname),User::getClassname,classname);
+        wrapper.orderByAsc(User::getCreateTime);
         wrapper.orderByDesc(User::getUpdateTime);
 
         userService.page(pageInfo,wrapper);
         return R.success(pageInfo);
     }
+    @GetMapping("/student/classnameList")
+    public R<List<String>> getClassnameList()
+    {
+        QueryWrapper<User> wrapper = new QueryWrapper<>();
+        wrapper.select("DISTINCT classname");
+        List<String> list = userService.list(wrapper).stream().map( (item) -> {
+            String classname = item.getClassname();
+            return classname;
+        }).collect(Collectors.toList());
+        return R.success(list);
+    }
     @PutMapping
-    public R<String> update(User user,HttpServletRequest request)
+    public R<String> update(@RequestParam("userinfo") User user,@RequestParam("token") String token)
     {
         //1.查询现在登录的用户权限
-        Object id = request.getSession().getAttribute("user");
-        User older = userService.getById((Long) id);
         //2.如果当前登录用户为学生则不能更改班级等信息
-        if(!older.getClassname().equals("教师")) {
-            if(!user.getClassname().equals(older.getClassname()))
-                return R.error("无权限修改");
-        }
-        userService.updateById(user);
+        log.info("user:{}\ntoken:{}",user,token);
         return null;
-    }
-    @GetMapping("/{id}")
-    public R<User> getUserById(@PathVariable Long id)
-    {
-        User byId = userService.getById(id);
-        if(byId != null) {
-            return R.success(byId);
-        }
-        return R.error("查无此用户");
     }
 }

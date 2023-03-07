@@ -1,24 +1,19 @@
 package com.tuchuan.face_recognition_acs.Entity;
 
-import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
-/**
- * 用于记录出入信息
- */
 @Data
-@TableName(value = "access_infomation")
-public class ACinfo implements Serializable
+public class Lab implements Serializable
 {
     private Long id;
-    private Long user_id;
-    private String user_name;
+    private String lab_name;
+    private String description;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime in_time;
+    private LocalDateTime openTime;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime out_time;
+    private LocalDateTime closedTime;
 }

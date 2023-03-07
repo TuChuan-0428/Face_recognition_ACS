@@ -29,7 +29,7 @@ public class FaceEngineFactory {
         engineConfiguration.setFunctionConfiguration(detectFunctionCfg);
         engineConfiguration.setDetectMode(DetectMode.ASF_DETECT_MODE_IMAGE);
         engineConfiguration.setDetectFaceOrientPriority(DetectOrient.ASF_OP_0_ONLY);
-        FaceEngine faceEngine = new FaceEngine(System.getProperty("user.dir")+"/lib/WIN64");
+        FaceEngine faceEngine = new FaceEngine("C:\\Users\\96580\\IdeaProjects\\face_recognition_ACS\\lib\\WIN64");
         int activeCode = faceEngine.activeOnline(appId, sdkKey);
         if (activeCode != ErrorInfo.MOK.getValue() && activeCode != ErrorInfo.MERR_ASF_ALREADY_ACTIVATED.getValue()) {
             log.error("引擎激活失败" + activeCode);
