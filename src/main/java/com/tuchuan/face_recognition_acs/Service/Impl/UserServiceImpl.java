@@ -2,6 +2,7 @@ package com.tuchuan.face_recognition_acs.Service.Impl;
 
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tuchuan.face_recognition_acs.Entity.User;
 import com.tuchuan.face_recognition_acs.Mapper.UserMapper;
@@ -58,5 +59,27 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             return data;
         }
         return null;
+    }
+
+    @Override
+    public boolean update(User user, String token) {
+        //根据token查询redis，判断用户是否登录
+        Object o = redisTemplate.opsForValue().get(token);
+        boolean update;
+        //执行更新操作
+        if(o != null) {
+            User LoginUser = JSON.parseObject(JSON.toJSONString(o),User.class);
+            //如果修改的是当前登录用户本身则删除redis中数据，确保数据一致性
+            if(LoginUser.getUsername().equals(user.getUsername())) {
+                redisTemplate.delete(token);
+            }
+            if(StringUtils.isNotEmpty(user.getPassword()) && user.getPassword() != null) {
+                user.setPassword(DigestUtils.md5DigestAsHex(user.getPassword().getBytes()));
+            }
+             update = this.updateById(user);
+        }
+        else
+            return false;
+        return update;
     }
 }

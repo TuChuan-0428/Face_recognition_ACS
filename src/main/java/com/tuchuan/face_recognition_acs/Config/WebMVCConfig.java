@@ -8,7 +8,7 @@ public class WebMVCConfig extends WebMvcConfigurationSupport {
     @Override
     protected void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**") // 可以被跨域请求的接口，/**此时表示所有
-                .allowedMethods("*")
+                .allowedMethods(new String[] {"get","post","put","delete"})
                 .allowedOrigins("*")
                 .allowedHeaders("*")
                 .allowCredentials(false)

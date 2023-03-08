@@ -2,7 +2,10 @@ package com.tuchuan.face_recognition_acs.Entity;
 
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -10,7 +13,8 @@ import java.time.LocalDateTime;
 
 @Data
 public class User implements Serializable {
-    private static final long serialVersionUID = 1L;
+
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long id;
     private String username;
     private String name;

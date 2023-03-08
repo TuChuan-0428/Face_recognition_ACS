@@ -8,16 +8,12 @@ import com.tuchuan.face_recognition_acs.Common.R;
 import com.tuchuan.face_recognition_acs.Entity.User;
 import com.tuchuan.face_recognition_acs.Service.UserService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @CrossOrigin
@@ -53,12 +49,21 @@ public class UserController {
         Map<String,Object> data = userService.getUserInfo(token);
         return R.success(data);
     }
+    @GetMapping("/{id}")
+    public R<User> getUserById(@PathVariable Long id)
+    {
+        User byId = userService.getById(id);
+        byId.setPassword(null);
+        return R.success(byId);
+    }
     @PostMapping
     public R<String> regUser(@RequestBody User user)
     {
         log.info("user:{}",user);
         //1.将页面提交的密码password进行MD5加密
-        user.setPassword(DigestUtils.md5DigestAsHex(user.getPassword().getBytes()));
+        if(StringUtils.isNotEmpty(user.getPassword()) && user.getPassword() != null){
+            user.setPassword(DigestUtils.md5DigestAsHex(user.getPassword().getBytes()));
+        }
         //2.校验用户名和手机号是否重复
         LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(User::getUsername,user.getUsername());
@@ -94,7 +99,7 @@ public class UserController {
         userService.page(pageInfo,wrapper);
         return R.success(pageInfo);
     }
-    @GetMapping("/student/classnameList")
+    @GetMapping("/student/classname")
     public R<List<String>> getClassnameList()
     {
         QueryWrapper<User> wrapper = new QueryWrapper<>();
@@ -106,11 +111,18 @@ public class UserController {
         return R.success(list);
     }
     @PutMapping
-    public R<String> update(@RequestParam("userinfo") User user,@RequestParam("token") String token)
+    public R<String> update(@RequestBody User user,@RequestHeader("X-Token") String token)
     {
-        //1.查询现在登录的用户权限
-        //2.如果当前登录用户为学生则不能更改班级等信息
-        log.info("user:{}\ntoken:{}",user,token);
-        return null;
+        log.info("user:{} token:{}",user,token);
+        if(userService.update(user,token))
+            return R.success("更新成功");
+        return R.error("更新失败");
+    }
+    @DeleteMapping("/{id}")
+    public R<String> delete(@PathVariable Long id)
+    {
+        log.info("id:{}",id);
+        userService.removeById(id);
+        return R.success("删除成功");
     }
 }
