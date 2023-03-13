@@ -7,14 +7,17 @@ import com.arcsoft.face.enums.DetectMode;
 import com.arcsoft.face.enums.DetectOrient;
 import com.arcsoft.face.enums.ErrorInfo;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+
+import java.io.File;
+
 @Slf4j
 public class FaceEngineFactory {
+    @Value("${config.arcface-sdk.app-id}")
     private String appId;
+    @Value("${config.arcface-sdk.sdk-key}")
     private String sdkKey;
-    public FaceEngineFactory(String appId, String sdkKey) {
-        this.appId = appId;
-        this.sdkKey = sdkKey;
-    }
+    private final String savePath = "F:" + File.separator + "faceImg" + File.separator;
     public FaceEngine createDetectFaceEngine()
     {
         FunctionConfiguration detectFunctionCfg = new FunctionConfiguration();

@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.tuchuan.face_recognition_acs.Common.R;
+import com.tuchuan.face_recognition_acs.Dto.FaceModel;
 import com.tuchuan.face_recognition_acs.Entity.User;
 import com.tuchuan.face_recognition_acs.Service.UserService;
 import lombok.extern.slf4j.Slf4j;
@@ -124,5 +125,12 @@ public class UserController {
         log.info("id:{}",id);
         userService.removeById(id);
         return R.success("删除成功");
+    }
+    @PutMapping("/student")
+    public R<String> setClassRules(@RequestBody FaceModel faceModel)
+    {
+        log.info("className:{}",faceModel);
+        userService.setClassRules(faceModel.getClassName(),faceModel.getRules());
+        return R.success("设置班级访问权限成功");
     }
 }

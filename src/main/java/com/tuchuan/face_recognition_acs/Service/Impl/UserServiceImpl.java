@@ -14,9 +14,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
@@ -81,5 +82,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         else
             return false;
         return update;
+    }
+
+    @Override
+    public void setClassRules(String className,int rules)
+    {
+        LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(className != null,User::getClassname,className);
+        List<User> userList = this.list(wrapper);
+        for(User u:userList) {
+            u.setRules(rules);
+        }
+        this.updateBatchById(userList);
     }
 }

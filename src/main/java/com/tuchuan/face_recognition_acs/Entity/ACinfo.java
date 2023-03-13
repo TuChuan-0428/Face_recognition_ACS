@@ -13,15 +13,17 @@ import java.time.LocalDateTime;
  * 用于记录出入信息
  */
 @Data
-@TableName(value = "access_infomation")
+@TableName(value = "access_information")
 public class ACinfo implements Serializable
 {
     @JsonSerialize(using = ToStringSerializer.class)
     private Long id;
-    private Long user_id;
-    private String user_name;
+    private Long userId;
+    private String userName;
+    private String userClass;
+    private String labName;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime in_time;
+    private LocalDateTime inTime;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime out_time;
+    private LocalDateTime outTime;
 }

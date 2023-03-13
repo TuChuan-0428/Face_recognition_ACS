@@ -17,31 +17,33 @@ import static com.arcsoft.face.toolkit.ImageFactory.getRGBData;
 @Slf4j
 public class FaceTest {
     public static void main(String[] args) {
-        String appId = "AzTekTGWTkBfhjtwPJDx77pvtWp4cK4hr8nByzDtMxZE";
-        String sdkKey = "7Ti1U26gGizABnb26fwBxyNSDqzcHx6PSHBfD1yGEL8i";
-        FaceEngineFactory faceEngineFactory = new FaceEngineFactory(appId,sdkKey);
+        FaceEngineFactory faceEngineFactory = new FaceEngineFactory();
         FaceEngine faceEngine = faceEngineFactory.createDetectFaceEngine();
-        //特征提取
-        ImageInfo imageInfo = getRGBData(new File("F:" + File.separator + "faceImg" + File.separator + "a.jpg"));
+        int errorCode;
+        //人脸提取
+        ImageInfo imageInfo = getRGBData(new File("F:" + File.separator + "faceImg" + File.separator + "myself0.png"));
+        ImageInfo imageInfo1 = getRGBData(new File("F:" + File.separator + "faceImg" + File.separator + "myself1.png"));
         List<FaceInfo> faceInfoList = new ArrayList<FaceInfo>();
-        int errorCode = faceEngine.detectFaces(imageInfo.getImageData(), imageInfo.getWidth(), imageInfo.getHeight(), imageInfo.getImageFormat(), faceInfoList);
+        errorCode = faceEngine.detectFaces(imageInfo.getImageData(), imageInfo.getWidth(), imageInfo.getHeight(), imageInfo.getImageFormat(), faceInfoList);
         System.out.println(faceInfoList);
+        List<FaceInfo> faceInfoList1 = new ArrayList<FaceInfo>();
+        errorCode = faceEngine.detectFaces(imageInfo1.getImageData(), imageInfo1.getWidth(), imageInfo1.getHeight(), imageInfo1.getImageFormat(), faceInfoList1);
+        System.out.println(faceInfoList1);
+        //特征提取
         FaceFeature faceFeature = new FaceFeature();
+        FaceFeature faceFeature1 = new FaceFeature();
         errorCode = faceEngine.extractFaceFeature(imageInfo.getImageData(), imageInfo.getWidth(), imageInfo.getHeight(), imageInfo.getImageFormat(), faceInfoList.get(0), faceFeature);
-        System.out.println("特征值大小：" + faceFeature.getFeatureData().length);
-        ImageInfo imageInfo2 = getRGBData(new File("F:" + File.separator + "faceImg" + File.separator + "b.jpg"));
-        List<FaceInfo> faceInfoList2 = new ArrayList<FaceInfo>();
-        int errorCode2 = faceEngine.detectFaces(imageInfo.getImageData(), imageInfo.getWidth(), imageInfo.getHeight(), imageInfo.getImageFormat(), faceInfoList);
-        System.out.println(faceInfoList);
-        FaceFeature faceFeature2 = new FaceFeature();
-        errorCode2 = faceEngine.extractFaceFeature(imageInfo.getImageData(), imageInfo.getWidth(), imageInfo.getHeight(), imageInfo.getImageFormat(), faceInfoList.get(0), faceFeature);
-        System.out.println("特征值大小：" + faceFeature.getFeatureData().length);
+        errorCode = faceEngine.extractFaceFeature(imageInfo1.getImageData(),imageInfo1.getWidth(),imageInfo1.getHeight(),imageInfo1.getImageFormat(),faceInfoList1.get(0),faceFeature1);
+        //人脸特征值比对
         FaceFeature targetFaceFeature = new FaceFeature();
         targetFaceFeature.setFeatureData(faceFeature.getFeatureData());
         FaceFeature sourceFaceFeature = new FaceFeature();
-        sourceFaceFeature.setFeatureData(faceFeature2.getFeatureData());
+        sourceFaceFeature.setFeatureData(faceFeature1.getFeatureData());
         FaceSimilar faceSimilar = new FaceSimilar();
+        System.out.println("FaceFeature:" + faceFeature.getFeatureData());
+        System.out.println("FaceFeature:" + faceFeature.getFeatureData());
+
         errorCode = faceEngine.compareFaceFeature(targetFaceFeature, sourceFaceFeature, faceSimilar);
-        log.info("相似度:{}" , faceSimilar.getScore());
+        System.out.println("faceSimilar:" + faceSimilar.getScore());
     }
 }

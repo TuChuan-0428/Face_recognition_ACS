@@ -13,4 +13,6 @@ public interface UserService extends IService<User> {
     void logout(String token);
 
     boolean update(User user,String token);
+
+    void setClassRules(String className,int rules);
 }
